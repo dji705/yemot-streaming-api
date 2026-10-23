@@ -1,17 +1,17 @@
 // Yemot HaMashiach streaming/radio menu.
-// First call: ask the caller to choose a station.
-// Follow-up call: Yemot sends the selected value in the "Station" parameter.
+// The read action follows the documented Yemot API format:
+// read=t-prompt=PARAM,,max_digits,min_digits,Digits,yes
 //
-// IMPORTANT: music_on_hold accepts a station/music name configured in the Yemot
-// account. It is not a generic command for playing arbitrary external URLs.
-// Ask Yemot support to enable/configure each live stream name before using it.
+// IMPORTANT: music_on_hold plays a music/stream name already configured in the
+// Yemot account. It does not accept arbitrary public radio URLs. Configure each
+// station name in Yemot first, otherwise selecting it may fail/end the call.
 
 const stations = {
   "1": { name: "כאן ב", yemotName: "כאן ב" },
   "2": { name: "כאן גימל", yemotName: "כאן גימל" },
   "3": { name: "כאן 88", yemotName: "כאן 88" },
   "4": { name: "גלגלצ", yemotName: "גלגלצ" },
-  "5": { name: "גלי צה״ל", yemotName: "גלי צה״ל" },
+  "5": { name: "גלי צהל", yemotName: "גלי צהל" },
   "6": { name: "רדיו 103FM", yemotName: "רדיו 103FM" },
   "7": { name: "רדיו תל אביב", yemotName: "רדיו תל אביב" },
   "8": { name: "רדיו ירושלים", yemotName: "רדיו ירושלים" },
@@ -26,25 +26,25 @@ function respond(res, body, status = 200) {
 
 module.exports = (req, res) => {
   const query = req.query || {};
-  const selected = String(query.Station ?? query.station ?? query.Digits ?? query.digits ?? "").trim();
+  const selected = String(
+    query.Station ?? query.station ?? query.Digits ?? query.digits ?? ""
+  ).trim();
 
-  // Selection received from the read action.
   if (selected) {
     const station = stations[selected];
     if (!station) {
       return respond(
         res,
-        "read=t-הבחירה לא קיימת. נסו שוב=Station,,1,1,7,Digits,no,no,,,1,Ok"
+        "read=t-הבחירה לא תקינה. לבחירת כאן ב הקישו 1. לכאן גימל הקישו 2. לכאן 88 הקישו 3. לגלגלצ הקישו 4. לגלי צהל הקישו 5. לרדיו 103FM הקישו 6. לרדיו תל אביב הקישו 7. לרדיו ירושלים הקישו 8=Station,,1,1,Digits,yes"
       );
     }
 
-    // This is the documented Yemot API action for a configured music/live-stream name.
-    return respond(res, `music_on_hold=${station.yemotName}`);
+    // Must match an actual music/stream name configured in the user's Yemot account.
+    return respond(res, `music_on_hold=${station.yemotName},60`);
   }
 
-  // Ask for a one-digit choice and send it back to this API as "Station".
   return respond(
     res,
-    "read=t-לבחירת כאן ב הקישו 1. לכאן גימל הקישו 2. לכאן 88 הקישו 3. לגלגלצ הקישו 4. לגלי צהל הקישו 5. לרדיו 103FM הקישו 6. לרדיו תל אביב הקישו 7. לרדיו ירושלים הקישו 8=Station,,1,1,7,Digits,no,no,,,1,Ok"
+    "read=t-לבחירת כאן ב הקישו 1. לכאן גימל הקישו 2. לכאן 88 הקישו 3. לגלגלצ הקישו 4. לגלי צהל הקישו 5. לרדיו 103FM הקישו 6. לרדיו תל אביב הקישו 7. לרדיו ירושלים הקישו 8=Station,,1,1,Digits,yes"
   );
 };
