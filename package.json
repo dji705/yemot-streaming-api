@@ -1,0 +1,9 @@
+{
+  "name": "yemot-streaming-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Audio streaming catalog and Yemot HaMashiach API endpoint",
+  "engines": {
+    "node": ">=18"
+  }
+}
