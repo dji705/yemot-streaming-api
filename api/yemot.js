@@ -1,6 +1,9 @@
 // Yemot HaMashiach radio menu.
-// Uses the documented read response shape: read=prompt=variable,,max,min,type,block_star
-// The chosen station must already exist as a music-on-hold item in the Yemot account.
+// Response follows the Yemot API read format:
+// read=prompt=variable,confirm,max_digits,min_digits,timeout,input_type,
+// block_star,block_zero,key_replacement,allowed_keys,retries,no_input_action
+//
+// Note: station names must be configured as playable music/stream names in Yemot.
 
 const stations = {
   "1": { name: "כאן ב", yemotName: "כאן ב" },
@@ -16,6 +19,10 @@ const stations = {
 const prompt =
   "t-לבחירת כאן ב הקישו 1. לכאן גימל הקישו 2. לכאן 88 הקישו 3. לגלגלצ הקישו 4. לגלי צהל הקישו 5. לרדיו 103FM הקישו 6. לרדיו תל אביב הקישו 7. לרדיו ירושלים הקישו 8";
 
+// Keep every read field in the documented order. One digit, 7-second input window.
+// Only digits 1-8 are allowed; no confirmation playback.
+const readChoice = `read=${prompt}=Station,no,1,1,7,Digits,yes,no,*/,12345678,3,Ok`;
+
 function respond(res, body, status = 200) {
   res.statusCode = status;
   res.setHeader("Content-Type", "text/plain; charset=utf-8");
@@ -29,14 +36,10 @@ module.exports = (req, res) => {
     query.Station ?? query.station ?? query.Digits ?? query.digits ?? ""
   ).trim();
 
-  if (!selected) {
-    return respond(res, `read=${prompt}=Station,,1,1,Digits,yes`);
-  }
+  if (!selected) return respond(res, readChoice);
 
   const station = stations[selected];
-  if (!station) {
-    return respond(res, `read=t-הבחירה לא תקינה. ${prompt.slice(2)}=Station,,1,1,Digits,yes`);
-  }
+  if (!station) return respond(res, readChoice);
 
   return respond(res, `music_on_hold=${station.yemotName},60`);
 };
