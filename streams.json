@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "name": "מוזיקת רקע באיכות גבוהה",
+    "format": "MP3",
+    "bitrate": "128 kbps stereo",
+    "url": "https://streams.radiomast.io/ref-128k-mp3-stereo",
+    "source": "https://www.radiomast.io/reference-streams",
+    "license_note": "Radio Mast states that its reference streams are available free for personal and commercial use."
+  },
+  {
+    "id": 2,
+    "name": "מוזיקת רקע חסכונית לשיחות",
+    "format": "MP3",
+    "bitrate": "32 kbps mono",
+    "url": "https://streams.radiomast.io/ref-32k-mp3-mono",
+    "source": "https://www.radiomast.io/reference-streams",
+    "license_note": "Radio Mast states that its reference streams are available free for personal and commercial use."
+  },
+  {
+    "id": 3,
+    "name": "מוזיקת רקע בפורמט HLS",
+    "format": "HLS",
+    "bitrate": "128 kbps",
+    "url": "https://streams.radiomast.io/ref-128k-mp3-stereo/hls.m3u8",
+    "source": "https://www.radiomast.io/reference-streams",
+    "license_note": "Radio Mast states that its reference streams are available free for personal and commercial use."
+  }
+]
