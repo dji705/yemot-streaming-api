@@ -1,26 +1,20 @@
-// Yemot HaMashiach streaming API
-// GET /api/yemot                 -> menu
-// GET /api/yemot?item=1          -> MP3 stream
-// GET /api/yemot?item=2          -> low-bandwidth MP3 stream
-// GET /api/yemot?item=3          -> HLS stream
+// Yemot HaMashiach streaming/radio menu.
+// First call: ask the caller to choose a station.
+// Follow-up call: Yemot sends the selected value in the "Station" parameter.
 //
-// The included Radio Mast reference streams are licensed for free personal
-// and commercial use according to https://www.radiomast.io/reference-streams.
-// They are test/reference streams, not Israeli radio stations.
+// IMPORTANT: music_on_hold accepts a station/music name configured in the Yemot
+// account. It is not a generic command for playing arbitrary external URLs.
+// Ask Yemot support to enable/configure each live stream name before using it.
 
-const streams = {
-  "1": {
-    name: "מוזיקת רקע באיכות גבוהה",
-    url: "https://streams.radiomast.io/ref-128k-mp3-stereo",
-  },
-  "2": {
-    name: "מוזיקת רקע חסכונית לשיחות",
-    url: "https://streams.radiomast.io/ref-32k-mp3-mono",
-  },
-  "3": {
-    name: "מוזיקת רקע בפורמט HLS",
-    url: "https://streams.radiomast.io/ref-128k-mp3-stereo/hls.m3u8",
-  },
+const stations = {
+  "1": { name: "כאן ב", yemotName: "כאן ב" },
+  "2": { name: "כאן גימל", yemotName: "כאן גימל" },
+  "3": { name: "כאן 88", yemotName: "כאן 88" },
+  "4": { name: "גלגלצ", yemotName: "גלגלצ" },
+  "5": { name: "גלי צה״ל", yemotName: "גלי צה״ל" },
+  "6": { name: "רדיו 103FM", yemotName: "רדיו 103FM" },
+  "7": { name: "רדיו תל אביב", yemotName: "רדיו תל אביב" },
+  "8": { name: "רדיו ירושלים", yemotName: "רדיו ירושלים" },
 };
 
 function respond(res, body, status = 200) {
@@ -31,18 +25,26 @@ function respond(res, body, status = 200) {
 }
 
 module.exports = (req, res) => {
-  const item = String((req.query && req.query.item) || "");
-  if (item && streams[item]) {
-    // Yemot API response: play the selected remote stream.
-    return respond(res, `playfile=${streams[item].url}`);
+  const query = req.query || {};
+  const selected = String(query.Station ?? query.station ?? query.Digits ?? query.digits ?? "").trim();
+
+  // Selection received from the read action.
+  if (selected) {
+    const station = stations[selected];
+    if (!station) {
+      return respond(
+        res,
+        "read=t-הבחירה לא קיימת. נסו שוב=Station,,1,1,7,Digits,no,no,,,1,Ok"
+      );
+    }
+
+    // This is the documented Yemot API action for a configured music/live-stream name.
+    return respond(res, `music_on_hold=${station.yemotName}`);
   }
 
-  if (item) {
-    return respond(res, "read=האפשרות לא קיימת. לחזרה לתפריט הקישו כוכבית");
-  }
-
+  // Ask for a one-digit choice and send it back to this API as "Station".
   return respond(
     res,
-    "read=להשמעת מוזיקת רקע באיכות גבוהה הקישו 1. למוזיקת רקע חסכונית לשיחות הקישו 2. להשמעה בפורמט HLS הקישו 3"
+    "read=t-לבחירת כאן ב הקישו 1. לכאן גימל הקישו 2. לכאן 88 הקישו 3. לגלגלצ הקישו 4. לגלי צהל הקישו 5. לרדיו 103FM הקישו 6. לרדיו תל אביב הקישו 7. לרדיו ירושלים הקישו 8=Station,,1,1,7,Digits,no,no,,,1,Ok"
   );
 };
